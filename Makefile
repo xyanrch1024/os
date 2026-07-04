@@ -169,7 +169,7 @@ run: $(TARGET)
 	qemu-system-x86_64 -kernel $(TARGET) -m 128M -serial stdio -display none -no-reboot -no-shutdown
 
 run-gui: $(TARGET)
-	qemu-system-x86_64 -kernel $(TARGET) -m 128M -serial stdio -display gtk -no-reboot -no-shutdown
+	GDK_SCALE=2 qemu-system-x86_64 -kernel $(TARGET) -m 128M -serial stdio -display gtk -no-reboot -no-shutdown
 
 clean:
 	rm -rf $(BUILD)
