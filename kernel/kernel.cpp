@@ -51,30 +51,30 @@ extern "C" void kernel_main(uint32_t magic, uint32_t mb_info_addr) {
     klog_write_hex(mb_info_addr);
     klog_write("\n\n");
 
-    klog_write("[INIT] GDT...\n");  gdt_init();  klog_write("[OK]   GDT installed\n");
-    klog_write("[INIT] ISR...\n");  isr_install();  klog_write("[OK]   ISR installed\n");
-    klog_write("[INIT] IDT...\n");  idt_init();  klog_write("[OK]   IDT loaded\n");
-    klog_write("[INIT] PIC...\n");  pic_init();  pic_set_mask(0xEC, 0xFF);  klog_write("[OK]   PIC remapped\n");
-    klog_write("[INIT] PIT...\n");  timer_init(100);  klog_write("[OK]   PIT 100Hz\n");
-    klog_write("[INIT] PMM...\n");  pmm_init(128);  klog_write("[OK]   PMM ready\n");
-    klog_write("[INIT] VMM...\n");  vmm_init();  klog_write("[OK]   VMM ready\n");
-    klog_write("[INIT] Kmalloc...\n");  kmalloc_init();  klog_write("[OK]   Kmalloc ready\n");
-    klog_write("[INIT] Keyboard...\n");  kb_init();  klog_write("[OK]   Keyboard ready\n");
-    klog_write("[INIT] Syscalls...\n");  syscall_init();  klog_write("[OK]   Syscalls ready\n");
+    klog_write("[INIT] GDT...\n");  gdt_init();  klog_ok("[OK]   GDT installed\n");
+    klog_write("[INIT] ISR...\n");  isr_install();  klog_ok("[OK]   ISR installed\n");
+    klog_write("[INIT] IDT...\n");  idt_init();  klog_ok("[OK]   IDT loaded\n");
+    klog_write("[INIT] PIC...\n");  pic_init();  pic_set_mask(0xEC, 0xFF);  klog_ok("[OK]   PIC remapped\n");
+    klog_write("[INIT] PIT...\n");  timer_init(100);  klog_ok("[OK]   PIT 100Hz\n");
+    klog_write("[INIT] PMM...\n");  pmm_init(128);  klog_ok("[OK]   PMM ready\n");
+    klog_write("[INIT] VMM...\n");  vmm_init();  klog_ok("[OK]   VMM ready\n");
+    klog_write("[INIT] Kmalloc...\n");  kmalloc_init();  klog_ok("[OK]   Kmalloc ready\n");
+    klog_write("[INIT] Keyboard...\n");  kb_init();  klog_ok("[OK]   Keyboard ready\n");
+    klog_write("[INIT] Syscalls...\n");  syscall_init();  klog_ok("[OK]   Syscalls ready\n");
     klog_write("[INIT] Tasks...\n");
     task_init();
     Task* idle = task_create(idle_entry);
     task_create(shell_entry);
     scheduler_init();
-    klog_write("[OK]   Tasks ready\n");
+    klog_ok("[OK]   Tasks ready\n");
 
     klog_write("[INIT] TSS...\n");
     tss_init();
-    klog_write("[OK]   TSS ready\n");
+    klog_ok("[OK]   TSS ready\n");
 
     klog_write("[INIT] Filesystem...\n");
     fs_init();
-    klog_write("[OK]   Filesystem ready\n");
+    klog_ok("[OK]   Filesystem ready\n");
 
     while (port_byte_in(0x3F8 + 5) & 0x01) port_byte_in(0x3F8);
 

@@ -147,7 +147,7 @@ void fs_init() {
 
     devfs_init();
 
-    klog_write("[OK] VFS ready\n");
+    klog_ok("[OK] VFS ready\n");
 }
 
 int fs_open(const char* path, int flags) {

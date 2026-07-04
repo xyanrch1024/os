@@ -50,7 +50,7 @@ void vmm_init() {
 
     __asm__ volatile("mov %0, %%cr3" : : "r"(pml4_page) : "memory");
 
-    klog_write("[OK]   VMM: identity-mapped 128MB\n");
+    klog_ok("[OK]   VMM: identity-mapped 128MB\n");
 }
 
 static uint64_t* walk_page_table(uint64_t virt, bool create) {
