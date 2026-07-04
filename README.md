@@ -12,6 +12,7 @@ A minimal x86_64 hobby operating system kernel written in C++17, bootable on QEM
 - **Drivers**: PS/2 keyboard (IRQ1, scancode→ASCII), serial COM1 (IRQ4 RX/TX), VGA text mode
 - **Shell**: Interactive command-line with `help`, `clear`, `echo`, `meminfo`, `ticks`, `mtest`, `reboot`
 - **Timer**: PIT at 100 Hz, IRQ0-driven tick counter
+- **Filesystem**: VFS layer, tar-based initramfs, devfs (/dev/null, /dev/zero, /dev/serial)
 
 ## Build & Run
 
@@ -25,9 +26,10 @@ Requires: `g++`, `gcc`, `ld`, `objcopy`, `qemu-system-x86_64`
 
 ```
 boot/        — 32-bit boot wrapper (boot.S, linker)
-kernel/      — Core kernel (21 source files)
+kernel/      — Core kernel (23 source files)
 libc/        — Freestanding C++ stubs
 user/        — User-mode programs (hello.S)
+fs/          — initramfs file tree
 ```
 
 ## Phases
@@ -39,3 +41,4 @@ user/        — User-mode programs (hello.S)
 | 3 | Keyboard driver, serial RX, shell |
 | 4 | Task struct, context switch, scheduler, syscalls |
 | 5 | TSS, ring 3 user mode, ELF loader |
+| 6 | VFS, initramfs (tar), devfs, file I/O syscalls |

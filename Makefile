@@ -21,6 +21,10 @@ TARGET        = $(BUILD)/kernel.elf
 USER_ELF      = $(BUILD)/hello
 USER_EMBED_O  = $(BUILD)/hello_embed.o
 
+INITRAMFS_DIR  = fs/initramfs
+INITRAMFS_TAR  = $(BUILD)/initramfs.tar
+INITRAMFS_EMBED_O = $(BUILD)/initramfs_embed.o
+
 KERNEL64_OBJS = $(BUILD)/kernel.o    $(BUILD)/tty.o     \
                 $(BUILD)/gdt.o       $(BUILD)/idt.o      \
                 $(BUILD)/isr.o       $(BUILD)/pic.o      \
@@ -32,7 +36,9 @@ KERNEL64_OBJS = $(BUILD)/kernel.o    $(BUILD)/tty.o     \
                 $(BUILD)/shell.o     $(BUILD)/switch.o   \
                 $(BUILD)/task.o      $(BUILD)/scheduler.o \
                 $(BUILD)/syscall.o   $(BUILD)/user.o     \
-                $(BUILD)/user_mode.o $(USER_EMBED_O)
+                $(BUILD)/user_mode.o $(USER_EMBED_O)     \
+                $(BUILD)/fs.o        $(BUILD)/tarfs.o    \
+                $(INITRAMFS_EMBED_O)
 
 .PHONY: all clean run
 
@@ -128,6 +134,18 @@ $(USER_ELF): $(BUILD)/hello.o
 
 $(USER_EMBED_O): $(USER_ELF)
 	cd $(BUILD) && $(OBJCOPY) -I binary -O elf64-x86-64 -B i386 hello hello_embed.o
+
+$(INITRAMFS_TAR): $(shell find fs/initramfs -type f) | $(BUILD)
+	cd $(INITRAMFS_DIR) && tar --format=ustar -cf $(abspath $@) *
+
+$(INITRAMFS_EMBED_O): $(INITRAMFS_TAR)
+	cd $(BUILD) && $(OBJCOPY) -I binary -O elf64-x86-64 -B i386 initramfs.tar initramfs_embed.o
+
+$(BUILD)/fs.o: kernel/fs.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/tarfs.o: kernel/tarfs.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 run: $(TARGET)
 	qemu-system-x86_64 -kernel $(TARGET) -m 128M -serial stdio -display none -no-reboot -no-shutdown

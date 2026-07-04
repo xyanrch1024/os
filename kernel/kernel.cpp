@@ -14,6 +14,7 @@
 #include "scheduler.hpp"
 #include "syscall.hpp"
 #include "user.hpp"
+#include "fs.hpp"
 
 static void idle_entry() {
     while (1) {
@@ -78,6 +79,10 @@ extern "C" void kernel_main(uint32_t magic, uint32_t mb_info_addr) {
     tss_init();
     tty_write("[OK]   TSS ready\n");
 
+    tty_write("[INIT] Filesystem...\n");
+    fs_init();
+    tty_write("[OK]   Filesystem ready\n");
+
     tty_write("[INIT] Loading user program...\n");
     UserTaskInfo user_info;
     size_t elf_size = reinterpret_cast<size_t>(_binary_hello_end)
@@ -87,6 +92,27 @@ extern "C" void kernel_main(uint32_t magic, uint32_t mb_info_addr) {
         tty_write("[OK]   User program loaded\n");
     } else {
         tty_write("[FAIL] User program load failed\n");
+    }
+
+    int fd = fs_open("/etc/hostname", 0);
+    if (fd >= 0) {
+        char buf[64];
+        int n = fs_read(fd, reinterpret_cast<uint8_t*>(buf), 16);
+        if (n > 0) { buf[n] = 0; while (n > 0 && buf[n-1] == '\n') buf[--n] = 0; }
+        tty_write("  hostname: ");
+        tty_write(buf);
+        tty_write("\n");
+        fs_close(fd);
+    }
+    fd = fs_open("/etc/motd", 0);
+    if (fd >= 0) {
+        char buf[64];
+        int n = fs_read(fd, reinterpret_cast<uint8_t*>(buf), 32);
+        if (n > 0) { buf[n] = 0; while (n > 0 && buf[n-1] == '\n') buf[--n] = 0; }
+        tty_write("  motd: ");
+        tty_write(buf);
+        tty_write("\n");
+        fs_close(fd);
     }
 
     while (port_byte_in(0x3F8 + 5) & 0x01) port_byte_in(0x3F8);
