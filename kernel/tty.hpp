@@ -5,6 +5,8 @@
 void serial_init();
 void serial_putc(char c);
 char serial_getc();
+void serial_diag();
+extern volatile int g_poll_rx_count;
 void tty_init();
 void tty_putc(char c);
 void tty_write(const char* str);

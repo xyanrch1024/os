@@ -167,6 +167,7 @@ void shell_run() {
     tty_write("\n  MyOS Shell v1.0\n");
     tty_set_color(0x0F, 0x00);
     tty_write("  Type 'help' for commands\n\n");
+    serial_diag();
 
     while (1) {
         tty_write("myos> ");

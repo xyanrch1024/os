@@ -1,5 +1,6 @@
 #include "tty.hpp"
 #include "port.hpp"
+#include "klog.hpp"
 
 static const int VGA_WIDTH  = 80;
 static const int VGA_HEIGHT = 25;
@@ -15,6 +16,7 @@ static uint16_t* tty_buffer;
 
 static char ser_buffer[SER_BUF_SIZE];
 static int  ser_head, ser_tail;
+volatile int g_poll_rx_count;
 
 void serial_init() {
     port_byte_out(COM1 + 1, 0x00);
@@ -22,14 +24,21 @@ void serial_init() {
     port_byte_out(COM1 + 0, 0x03);
     port_byte_out(COM1 + 1, 0x00);
     port_byte_out(COM1 + 3, 0x03);
-    port_byte_out(COM1 + 2, 0x07);
+    port_byte_out(COM1 + 2, 0x03);
     port_byte_out(COM1 + 4, 0x0B);
-
-    port_byte_out(COM1 + 1, 0x01);
 
     ser_head = ser_tail = 0;
 
-    while (port_byte_in(COM1 + 5) & 0x01) port_byte_in(COM1);
+    while (port_byte_in(COM1 + 5) & 0x01) {
+        uint8_t c = port_byte_in(COM1);
+        int next = (ser_head + 1) % SER_BUF_SIZE;
+        if (next != ser_tail) {
+            ser_buffer[ser_head] = static_cast<char>(c);
+            ser_head = next;
+        }
+    }
+
+    port_byte_out(COM1 + 1, 0x01);
 }
 
 static int is_transmit_empty() {
@@ -56,11 +65,35 @@ extern "C" void serial_rx_irq_handler() {
     }
 }
 
+extern volatile int g_poll_rx_count;
+
 char serial_getc() {
-    if (ser_head == ser_tail) return 0;
-    char c = ser_buffer[ser_tail];
-    ser_tail = (ser_tail + 1) % SER_BUF_SIZE;
+    __asm__ volatile("cli");
+    char c;
+    if (ser_head != ser_tail) {
+        c = ser_buffer[ser_tail];
+        ser_tail = (ser_tail + 1) % SER_BUF_SIZE;
+    } else if (port_byte_in(COM1 + 5) & 0x01) {
+        c = static_cast<char>(port_byte_in(COM1));
+    } else {
+        c = 0;
+    }
+    __asm__ volatile("sti");
     return c;
+}
+
+void serial_diag() {
+    uint8_t ier = port_byte_in(COM1 + 1);
+    uint8_t lsr = port_byte_in(COM1 + 5);
+    klog_write("[SERIAL] IER="); klog_write_hex(ier);
+    klog_write(" LSR="); klog_write_hex(lsr);
+    klog_write(" head=");
+    klog_write_dec(ser_head);
+    klog_write(" tail=");
+    klog_write_dec(ser_tail);
+    klog_write(" poll=");
+    klog_write_dec(g_poll_rx_count);
+    klog_write("\n");
 }
 
 void tty_init() {

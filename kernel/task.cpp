@@ -61,6 +61,7 @@ Task* task_create(void (*entry)()) {
     uint64_t* sp = reinterpret_cast<uint64_t*>(task->kernel_stack + 4096);
 
     *--sp = reinterpret_cast<uint64_t>(task_entry_wrapper);
+    *--sp = 0x202;
     *--sp = 0;
     *--sp = 0;
     *--sp = 0;

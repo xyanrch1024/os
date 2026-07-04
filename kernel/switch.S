@@ -3,6 +3,7 @@
 
 .global switch_to
 switch_to:
+    pushfq
     pushq %rbx
     pushq %rbp
     pushq %r12
@@ -20,5 +21,6 @@ switch_to:
     popq %r12
     popq %rbp
     popq %rbx
+    popfq
 
     ret

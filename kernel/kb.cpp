@@ -51,6 +51,8 @@ char kb_getc() {
 }
 
 extern "C" void kb_irq_handler() {
+    static int dbg = 0;
+    dbg++;
     uint8_t sc = port_byte_in(KB_DATA);
 
     bool release = sc & 0x80;

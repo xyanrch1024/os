@@ -41,6 +41,14 @@ _start:
     cli
     movl $stack_top, %esp
 
+    pushl %eax
+    pushl %edx
+    movw $0x3FA, %dx
+    movb $0x03, %al
+    outb %al, %dx
+    popl %edx
+    popl %eax
+
     pushl $0
     pushl %eax
     pushl $0
