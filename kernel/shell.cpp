@@ -6,6 +6,7 @@
 #include "timer.hpp"
 #include "port.hpp"
 #include "libc.hpp"
+#include "fs.hpp"
 
 #define LINE_MAX 256
 
@@ -42,11 +43,31 @@ static void readline(char* buf, int max) {
     }
 }
 
+static void cmd_ls(int argc, char** argv) {
+    const char* path = (argc > 1) ? argv[1] : "/";
+    VNode* dir = resolve_path(path);
+    if (!dir) {
+        tty_write("ls: "); tty_write(path); tty_write(": not found\n");
+        return;
+    }
+    for (VNode* child = dir->children; child; child = child->next) {
+        char type = (child->type == VNODE_DIR) ? 'd' :
+                    (child->type == VNODE_DEV) ? 'c' : '-';
+        tty_putc(type);
+        tty_write("  ");
+        tty_write(child->name);
+        tty_write("  ");
+        tty_write_dec(child->size);
+        tty_write(" bytes\n");
+    }
+}
+
 static void cmd_help() {
     tty_write("Available commands:\n");
     tty_write("  help      - show this help\n");
     tty_write("  clear     - clear screen\n");
     tty_write("  echo ...  - print arguments\n");
+    tty_write("  ls [path] - list directory contents\n");
     tty_write("  meminfo   - show memory stats\n");
     tty_write("  ticks     - show PIT tick count\n");
     tty_write("  mtest     - test kmalloc/kfree\n");
@@ -136,6 +157,7 @@ void shell_run() {
         if      (strcmp(argv[0], "help") == 0)   cmd_help();
         else if (strcmp(argv[0], "clear") == 0)  tty_init();
         else if (strcmp(argv[0], "echo") == 0)   cmd_echo(argc, argv);
+        else if (strcmp(argv[0], "ls") == 0)     cmd_ls(argc, argv);
         else if (strcmp(argv[0], "meminfo") == 0) cmd_meminfo();
         else if (strcmp(argv[0], "ticks") == 0)  cmd_ticks();
         else if (strcmp(argv[0], "mtest") == 0)  cmd_mtest();

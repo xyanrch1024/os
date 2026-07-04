@@ -166,14 +166,22 @@ long_mode_start:
     movw %ax, %gs
     movw %ax, %ss
 
+    movl 8(%rsp), %r12d
+    movl 16(%rsp), %r13d
+
     movl (%rsp), %esi
     movl 4(%rsp), %ecx
     movl $0x200000, %edi
-    cld
+    addl %ecx, %esi
+    decl %esi
+    addl %ecx, %edi
+    decl %edi
+    std
     rep movsb
+    cld
 
-    movl 12(%rsp), %edi
-    movl 20(%rsp), %esi
+    movl %r12d, %edi
+    movl %r13d, %esi
     addq $24, %rsp
 
     movl $0x200000, %eax

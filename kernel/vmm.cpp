@@ -28,26 +28,26 @@ static void vmm_invlpg(uint64_t virt) {
 }
 
 void vmm_init() {
-    pml4 = get_cr3();
+    void* pml4_page = pmm_alloc_page();
+    void* pdpt_page = pmm_alloc_page();
+    void* pd_page   = pmm_alloc_page();
 
-    for (int i = 0; i < 512; i++) {
-        if (pml4[i] & PAGE_PRESENT) {
-            pml4[i] |= PAGE_USER;
-        }
-    }
+    pml4 = reinterpret_cast<uint64_t*>(pml4_page);
+    uint64_t* pdpt = reinterpret_cast<uint64_t*>(pdpt_page);
+    uint64_t* pd   = reinterpret_cast<uint64_t*>(pd_page);
 
-    uint64_t* pdpt = reinterpret_cast<uint64_t*>(pml4[0] & ~0xFFFULL);
-    for (int i = 0; i < 512; i++) {
-        if (pdpt[i] & PAGE_PRESENT) {
-            pdpt[i] |= PAGE_USER;
-        }
-    }
+    for (int i = 0; i < 512; i++) pml4[i] = 0;
+    for (int i = 0; i < 512; i++) pdpt[i] = 0;
+    for (int i = 0; i < 512; i++) pd[i]   = 0;
 
-    uint64_t* pd = reinterpret_cast<uint64_t*>(pdpt[0] & ~0xFFFULL);
+    pml4[0] = reinterpret_cast<uint64_t>(pdpt_page) | PAGE_PRESENT | PAGE_WRITABLE | PAGE_USER;
+    pdpt[0] = reinterpret_cast<uint64_t>(pd_page) | PAGE_PRESENT | PAGE_WRITABLE | PAGE_USER;
+
     for (int i = 0; i < 64; i++) {
         pd[i] = (static_cast<uint64_t>(i) << 21) | PAGE_PRESENT | PAGE_WRITABLE | PAGE_USER | PAGE_HUGE;
     }
-    vmm_tlb_flush();
+
+    __asm__ volatile("mov %0, %%cr3" : : "r"(pml4_page) : "memory");
 
     tty_write("[OK]   VMM: identity-mapped 128MB\n");
 }

@@ -1,0 +1,9 @@
+{
+    "volume_label": "MYOS",
+    "files": {
+        "README.TXT": "Welcome to the FAT32 filesystem on MyOS!\nFeel free to explore.\n",
+        "HELLO.TXT": "Hello, World from FAT32!\n",
+        "SUBDIR": null,
+        "SUBDIR/DEEP.TXT": "This is a nested file inside a subdirectory.\nIt shows that FAT32 directory traversal works.\n"
+    }
+}

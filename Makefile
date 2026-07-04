@@ -25,6 +25,10 @@ INITRAMFS_DIR  = fs/initramfs
 INITRAMFS_TAR  = $(BUILD)/initramfs.tar
 INITRAMFS_EMBED_O = $(BUILD)/initramfs_embed.o
 
+FAT32_IMG      = $(BUILD)/fat32.img
+FAT32_EMBED_O  = $(BUILD)/fat32_embed.o
+FAT32_MANIFEST = fs/fat32_manifest.json
+
 KERNEL64_OBJS = $(BUILD)/kernel.o    $(BUILD)/tty.o     \
                 $(BUILD)/gdt.o       $(BUILD)/idt.o      \
                 $(BUILD)/isr.o       $(BUILD)/pic.o      \
@@ -37,8 +41,9 @@ KERNEL64_OBJS = $(BUILD)/kernel.o    $(BUILD)/tty.o     \
                 $(BUILD)/task.o      $(BUILD)/scheduler.o \
                 $(BUILD)/syscall.o   $(BUILD)/user.o     \
                 $(BUILD)/user_mode.o $(USER_EMBED_O)     \
-                $(BUILD)/fs.o        $(BUILD)/tarfs.o    \
-                $(INITRAMFS_EMBED_O)
+                 $(BUILD)/fs.o        $(BUILD)/tarfs.o     \
+                 $(BUILD)/fat32.o    $(INITRAMFS_EMBED_O) \
+                 $(FAT32_EMBED_O)
 
 .PHONY: all clean run
 
@@ -141,10 +146,19 @@ $(INITRAMFS_TAR): $(shell find fs/initramfs -type f) | $(BUILD)
 $(INITRAMFS_EMBED_O): $(INITRAMFS_TAR)
 	cd $(BUILD) && $(OBJCOPY) -I binary -O elf64-x86-64 -B i386 initramfs.tar initramfs_embed.o
 
+$(FAT32_IMG): $(FAT32_MANIFEST) tools/mkfat32img.py | $(BUILD)
+	python3 tools/mkfat32img.py $(FAT32_IMG) $(FAT32_MANIFEST) 4
+
+$(FAT32_EMBED_O): $(FAT32_IMG)
+	cd $(BUILD) && $(OBJCOPY) -I binary -O elf64-x86-64 -B i386 fat32.img fat32_embed.o
+
 $(BUILD)/fs.o: kernel/fs.cpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD)/tarfs.o: kernel/tarfs.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/fat32.o: kernel/fat32.cpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 run: $(TARGET)

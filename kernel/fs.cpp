@@ -3,6 +3,7 @@
 #include "port.hpp"
 #include "kmalloc.hpp"
 #include "libc.hpp"
+#include "fat32.hpp"
 
 VNode*    root;
 static FileDesc  fd_table[MAX_FDS];
@@ -31,7 +32,7 @@ static VNode* vnode_find(VNode* dir, const char* name) {
     return nullptr;
 }
 
-static VNode* resolve_path(const char* path) {
+VNode* resolve_path(const char* path) {
     if (!path || path[0] != '/') return nullptr;
     if (path[0] == '/' && path[1] == 0) return root;
 
@@ -105,6 +106,8 @@ void devfs_init() {
 
 extern "C" uint8_t _binary_initramfs_tar_start[];
 extern "C" uint8_t _binary_initramfs_tar_end[];
+extern "C" char _binary_fat32_img_start;
+extern "C" char _binary_fat32_img_end;
 
 void tarfs_parse(const uint8_t* data, size_t size);
 
@@ -124,6 +127,22 @@ void fs_init() {
     size_t tar_size = reinterpret_cast<size_t>(_binary_initramfs_tar_end)
                     - reinterpret_cast<size_t>(_binary_initramfs_tar_start);
     tarfs_parse(_binary_initramfs_tar_start, tar_size);
+
+
+
+    {
+        uint64_t s = reinterpret_cast<uint64_t>(&_binary_fat32_img_start);
+        uint64_t e = reinterpret_cast<uint64_t>(&_binary_fat32_img_end);
+        size_t fat32_size = e - s;
+        tty_write("  FAT32 image: start=");
+        tty_write_hex(s);
+        tty_write(" end=");
+        tty_write_hex(e);
+        tty_write(" size=");
+        tty_write_dec(fat32_size);
+        tty_write("\n");
+        fat32_init(reinterpret_cast<const uint8_t*>(&_binary_fat32_img_start), fat32_size);
+    }
 
     devfs_init();
 

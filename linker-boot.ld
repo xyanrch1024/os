@@ -17,13 +17,13 @@ SECTIONS {
         *(.rodata)
     }
 
-    .data ALIGN(4K) : {
-        *(.data)
-    }
-
     .bss ALIGN(4K) : {
         *(COMMON)
         *(.bss)
+    }
+
+    .data ALIGN(4K) : {
+        *(.data)
     }
 
     /DISCARD/ : {

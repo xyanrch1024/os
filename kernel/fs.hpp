@@ -45,3 +45,5 @@ int   fs_write(int fd, const uint8_t* buf, uint64_t count);
 int   fs_close(int fd);
 int   fs_fstat(int fd, Stat* stat);
 int   fs_dup(int fd);
+
+VNode* resolve_path(const char* path);
