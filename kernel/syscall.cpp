@@ -2,6 +2,7 @@
 #include "isr.hpp"
 #include "idt.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 #include "task.hpp"
 #include "scheduler.hpp"
 #include "port.hpp"
@@ -94,5 +95,5 @@ extern "C" void syscall_stub();
 
 void syscall_init() {
     idt_set_gate(0x80, reinterpret_cast<uint64_t>(syscall_stub), 0xEE);
-    tty_write("[INIT] Syscalls... int 0x80 ready\n");
+    klog_write("[INIT] Syscalls... int 0x80 ready\n");
 }

@@ -36,7 +36,8 @@ KERNEL64_OBJS = $(BUILD)/kernel.o    $(BUILD)/tty.o     \
                 $(BUILD)/cpp_stubs.o $(BUILD)/string.o   \
                 $(BUILD)/entry.o     $(BUILD)/isr_wrapper.o \
                 $(BUILD)/pmm.o       $(BUILD)/vmm.o      \
-                $(BUILD)/kmalloc.o   $(BUILD)/kb.o       \
+                 $(BUILD)/kmalloc.o   $(BUILD)/klog.o     \
+                 $(BUILD)/kb.o       \
                 $(BUILD)/shell.o     $(BUILD)/switch.o   \
                 $(BUILD)/task.o      $(BUILD)/scheduler.o \
                 $(BUILD)/syscall.o   $(BUILD)/user.o     \
@@ -105,6 +106,9 @@ $(BUILD)/vmm.o: kernel/vmm.cpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD)/kmalloc.o: kernel/kmalloc.cpp | $(BUILD)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD)/klog.o: kernel/klog.cpp | $(BUILD)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD)/kb.o: kernel/kb.cpp | $(BUILD)

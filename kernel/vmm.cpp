@@ -1,6 +1,7 @@
 #include "vmm.hpp"
 #include "pmm.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 
 #define PAGE_WRITETHROUGH (1ULL << 3)
 #define PAGE_CACHE_DISABLE (1ULL << 4)
@@ -49,7 +50,7 @@ void vmm_init() {
 
     __asm__ volatile("mov %0, %%cr3" : : "r"(pml4_page) : "memory");
 
-    tty_write("[OK]   VMM: identity-mapped 128MB\n");
+    klog_write("[OK]   VMM: identity-mapped 128MB\n");
 }
 
 static uint64_t* walk_page_table(uint64_t virt, bool create) {

@@ -1,5 +1,6 @@
 #include "fs.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 #include "port.hpp"
 #include "kmalloc.hpp"
 #include "libc.hpp"
@@ -101,7 +102,7 @@ void devfs_init() {
     add_dev(dev, "zero",   1);
     add_dev(dev, "serial", 2);
 
-    tty_write("  devfs: /dev/null, /dev/zero, /dev/serial\n");
+    klog_write("  devfs: /dev/null, /dev/zero, /dev/serial\n");
 }
 
 extern "C" uint8_t _binary_initramfs_tar_start[];
@@ -134,19 +135,19 @@ void fs_init() {
         uint64_t s = reinterpret_cast<uint64_t>(&_binary_fat32_img_start);
         uint64_t e = reinterpret_cast<uint64_t>(&_binary_fat32_img_end);
         size_t fat32_size = e - s;
-        tty_write("  FAT32 image: start=");
-        tty_write_hex(s);
-        tty_write(" end=");
-        tty_write_hex(e);
-        tty_write(" size=");
-        tty_write_dec(fat32_size);
-        tty_write("\n");
+        klog_write("  FAT32 image: start=");
+        klog_write_hex(s);
+        klog_write(" end=");
+        klog_write_hex(e);
+        klog_write(" size=");
+        klog_write_dec(fat32_size);
+        klog_write("\n");
         fat32_init(reinterpret_cast<const uint8_t*>(&_binary_fat32_img_start), fat32_size);
     }
 
     devfs_init();
 
-    tty_write("[OK] VFS ready\n");
+    klog_write("[OK] VFS ready\n");
 }
 
 int fs_open(const char* path, int flags) {

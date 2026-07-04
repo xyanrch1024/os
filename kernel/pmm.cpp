@@ -1,5 +1,6 @@
 #include "pmm.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 
 static uint8_t*  bitmap;
 static uint64_t  total_pages;
@@ -31,11 +32,11 @@ void pmm_init(uint64_t mem_mb) {
         free_pages--;
     }
 
-    tty_write("[INIT] PMM... ");
-    tty_write_dec(free_pages);
-    tty_write(" free pages (");
-    tty_write_dec(free_pages * 4 / 1024);
-    tty_write(" MB)\n");
+    klog_write("[INIT] PMM... ");
+    klog_write_dec(free_pages);
+    klog_write(" free pages (");
+    klog_write_dec(free_pages * 4 / 1024);
+    klog_write(" MB)\n");
 }
 
 void* pmm_alloc_page() {

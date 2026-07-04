@@ -1,6 +1,7 @@
 #include "tarfs.hpp"
 #include "fs.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 #include "libc.hpp"
 #include "kmalloc.hpp"
 
@@ -131,7 +132,7 @@ void tarfs_parse(const uint8_t* data, size_t size) {
         pos += 512 + padded;
     }
 
-    tty_write("  tarfs: ");
-    tty_write_dec(count);
-    tty_write(" files loaded\n");
+    klog_write("  tarfs: ");
+    klog_write_dec(count);
+    klog_write(" files loaded\n");
 }

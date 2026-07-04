@@ -1,6 +1,7 @@
 #include "scheduler.hpp"
 #include "task.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 
 extern "C" {
     extern volatile bool       g_need_resched;
@@ -10,7 +11,7 @@ extern "C" {
 extern "C" void switch_to(uint64_t* current_rsp, uint64_t* next_rsp);
 
 void scheduler_init() {
-    tty_write("[INIT] Scheduler... Round Robin\n");
+    klog_write("[INIT] Scheduler... Round Robin\n");
 }
 
 #define TIME_SLICE_DEFAULT 3

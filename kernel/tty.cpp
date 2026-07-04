@@ -22,7 +22,7 @@ void serial_init() {
     port_byte_out(COM1 + 0, 0x03);
     port_byte_out(COM1 + 1, 0x00);
     port_byte_out(COM1 + 3, 0x03);
-    port_byte_out(COM1 + 2, 0xC7);
+    port_byte_out(COM1 + 2, 0x07);
     port_byte_out(COM1 + 4, 0x0B);
 
     port_byte_out(COM1 + 1, 0x01);

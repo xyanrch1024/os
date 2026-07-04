@@ -1,5 +1,6 @@
 #include "shell.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 #include "kb.hpp"
 #include "pmm.hpp"
 #include "kmalloc.hpp"
@@ -62,11 +63,28 @@ static void cmd_ls(int argc, char** argv) {
     }
 }
 
+static void cmd_cat(int argc, char** argv) {
+    if (argc < 2) { tty_write("cat: missing operand\n"); return; }
+    int fd = fs_open(argv[1], O_RDONLY);
+    if (fd < 0) {
+        tty_write("cat: "); tty_write(argv[1]); tty_write(": not found\n");
+        return;
+    }
+    uint8_t buf[512];
+    int n;
+    while ((n = fs_read(fd, buf, sizeof(buf))) > 0) {
+        for (int i = 0; i < n; i++) tty_putc(buf[i]);
+    }
+    fs_close(fd);
+}
+
 static void cmd_help() {
     tty_write("Available commands:\n");
     tty_write("  help      - show this help\n");
     tty_write("  clear     - clear screen\n");
     tty_write("  echo ...  - print arguments\n");
+    tty_write("  cat <file> - print file contents\n");
+    tty_write("  dmesg     - show kernel boot log\n");
     tty_write("  ls [path] - list directory contents\n");
     tty_write("  meminfo   - show memory stats\n");
     tty_write("  ticks     - show PIT tick count\n");
@@ -118,6 +136,10 @@ static void cmd_mtest() {
     kmalloc_stats();
 }
 
+static void cmd_dmesg() {
+    klog_dump();
+}
+
 static void cmd_reboot() {
     tty_write("Rebooting...\n");
     while ((port_byte_in(0x64) & 0x02)) {}
@@ -157,6 +179,8 @@ void shell_run() {
         if      (strcmp(argv[0], "help") == 0)   cmd_help();
         else if (strcmp(argv[0], "clear") == 0)  tty_init();
         else if (strcmp(argv[0], "echo") == 0)   cmd_echo(argc, argv);
+        else if (strcmp(argv[0], "cat") == 0)    cmd_cat(argc, argv);
+        else if (strcmp(argv[0], "dmesg") == 0)  cmd_dmesg();
         else if (strcmp(argv[0], "ls") == 0)     cmd_ls(argc, argv);
         else if (strcmp(argv[0], "meminfo") == 0) cmd_meminfo();
         else if (strcmp(argv[0], "ticks") == 0)  cmd_ticks();

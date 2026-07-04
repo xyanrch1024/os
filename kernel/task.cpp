@@ -2,6 +2,7 @@
 #include "pmm.hpp"
 #include "kmalloc.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 
 static uint64_t next_pid = 1;
 
@@ -38,7 +39,7 @@ void task_init() {
     next_pid = 1;
     g_current_task = nullptr;
     task_list_head = nullptr;
-    tty_write("[INIT] Task system...\n");
+    klog_write("[INIT] Task system...\n");
 }
 
 Task* task_create(void (*entry)()) {
@@ -71,9 +72,9 @@ Task* task_create(void (*entry)()) {
 
     task_add(task);
 
-    tty_write("  Task ");
-    tty_write_dec(task->pid);
-    tty_write(" created\n");
+    klog_write("  Task ");
+    klog_write_dec(task->pid);
+    klog_write(" created\n");
     return task;
 }
 

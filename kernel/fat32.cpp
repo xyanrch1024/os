@@ -1,6 +1,7 @@
 #include "fat32.hpp"
 #include "fs.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 #include "libc.hpp"
 #include "kmalloc.hpp"
 
@@ -171,14 +172,14 @@ static void load_dir(uint32_t dir_cluster, VNode* parent_vnode) {
 void fat32_init(const uint8_t* disk, size_t size) {
     g_disk = disk;
     g_disk_size = size;
-    tty_write("[INIT] FAT32: disk size=");
-    tty_write_dec(size);
+    klog_write("[INIT] FAT32: disk size=");
+    klog_write_dec(size);
 
     memcpy(&g_bpb, disk, sizeof(FAT32BPB));
-    tty_write(" bps=");
-    tty_write_dec(g_bpb.bytes_per_sector);
-    tty_write(" spc=");
-    tty_write_dec(g_bpb.sectors_per_cluster);
+    klog_write(" bps=");
+    klog_write_dec(g_bpb.bytes_per_sector);
+    klog_write(" spc=");
+    klog_write_dec(g_bpb.sectors_per_cluster);
 
     uint32_t fat_size_bytes = g_bpb.fat_size_32 * g_bpb.bytes_per_sector;
     g_fat = reinterpret_cast<uint32_t*>(kmalloc(fat_size_bytes));
@@ -189,8 +190,8 @@ void fat32_init(const uint8_t* disk, size_t size) {
     g_first_data_sector = g_bpb.reserved_sectors + g_bpb.num_fats * g_bpb.fat_size_32;
     g_cluster_size = g_bpb.bytes_per_sector * g_bpb.sectors_per_cluster;
 
-    tty_write(" fat=");
-    tty_write_dec(fat_size_bytes);
+    klog_write(" fat=");
+    klog_write_dec(fat_size_bytes);
 
     VNode* mnt = reinterpret_cast<VNode*>(kmalloc(sizeof(VNode)));
     memset(mnt, 0, sizeof(VNode));
@@ -202,7 +203,7 @@ void fat32_init(const uint8_t* disk, size_t size) {
     mnt->next = root->children;
     root->children = mnt;
 
-    tty_write(" loading...");
+    klog_write(" loading...");
     load_dir(g_bpb.root_cluster, mnt);
-    tty_write(" done\n");
+    klog_write(" done\n");
 }

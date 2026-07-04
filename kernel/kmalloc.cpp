@@ -1,6 +1,7 @@
 #include "kmalloc.hpp"
 #include "pmm.hpp"
 #include "tty.hpp"
+#include "klog.hpp"
 
 struct Block {
     size_t    size;
@@ -53,7 +54,7 @@ void kmalloc_init() {
     heap_head   = nullptr;
     heap_pages  = 0;
     kmalloc_add_pages(1);
-    tty_write("[INIT] Kmalloc... heap started\n");
+    klog_write("[INIT] Kmalloc... heap started\n");
 }
 
 void* kmalloc(size_t size) {

@@ -1,4 +1,5 @@
 #include "user.hpp"
+#include "klog.hpp"
 #include "gdt.hpp"
 #include "pmm.hpp"
 #include "vmm.hpp"
@@ -27,7 +28,7 @@ void tss_init() {
     memset(&tss, 0, sizeof(tss));
     gdt_install_tss(reinterpret_cast<uint64_t>(&tss), sizeof(tss) - 1);
     tss_flush();
-    tty_write("[INIT] TSS ready\n");
+    klog_write("[INIT] TSS ready\n");
 }
 
 void set_user_kernel_stack(uint64_t rsp0) {
