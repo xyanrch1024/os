@@ -13,7 +13,16 @@ void scheduler_init() {
     tty_write("[INIT] Scheduler... Round Robin\n");
 }
 
+#define TIME_SLICE_DEFAULT 3
+
 void scheduler_tick() {
+    if (!g_current_task) return;
+    if (g_current_task->ticks_left > 0) {
+        g_current_task->ticks_left--;
+    }
+    if (g_current_task->ticks_left == 0) {
+        g_need_resched = true;
+    }
 }
 
 void scheduler_yield() {
@@ -30,6 +39,7 @@ void scheduler_yield() {
     Task* prev = g_current_task;
     prev->state = TASK_READY;
     next->state = TASK_RUNNING;
+    next->ticks_left = TIME_SLICE_DEFAULT;
     g_current_task = next;
 
     switch_to(&prev->rsp, &next->rsp);

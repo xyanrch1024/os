@@ -2,6 +2,7 @@
 #include "idt.hpp"
 #include "tty.hpp"
 #include "port.hpp"
+#include "scheduler.hpp"
 
 static const char* exception_names[] = {
     "Division by zero",
@@ -59,6 +60,8 @@ extern "C" void kb_irq_handler();
 extern "C" void serial_rx_irq_handler();
 extern "C" void syscall_handler(InterruptFrame*);
 
+extern volatile bool g_need_resched;
+
 extern "C" void isr_handler(InterruptFrame* frame) {
     if (frame->int_no < 32) {
         tty_set_color(0x0C, 0x00);
@@ -105,6 +108,11 @@ extern "C" void isr_handler(InterruptFrame* frame) {
             port_byte_out(0xA0, 0x20);
         }
         port_byte_out(0x20, 0x20);
+    }
+
+    if (g_need_resched) {
+        g_need_resched = false;
+        scheduler_yield();
     }
 }
 

@@ -16,6 +16,7 @@ struct Task {
     void     (*entry)();
     uint64_t kernel_stack;
     Task*    next;
+    uint32_t ticks_left;
 };
 
 void  task_init();

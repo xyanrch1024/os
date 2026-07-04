@@ -55,6 +55,7 @@ Task* task_create(void (*entry)()) {
     task->state         = TASK_READY;
     task->kernel_stack  = reinterpret_cast<uint64_t>(stack_page);
     task->entry         = entry;
+    task->ticks_left    = 3;
 
     uint64_t* sp = reinterpret_cast<uint64_t*>(task->kernel_stack + 4096);
 

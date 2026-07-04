@@ -125,6 +125,7 @@ void start_user_task(UserTaskInfo* info) {
     task->entry         = nullptr;
     task->kernel_stack  = reinterpret_cast<uint64_t>(kstack);
     task->next          = nullptr;
+    task->ticks_left    = 3;
 
     tty_write("  User task PID=");
     tty_write_dec(task->pid);
